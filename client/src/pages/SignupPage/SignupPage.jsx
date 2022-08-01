@@ -1,38 +1,9 @@
-import { useReducer, useContext, useEffect } from "react";
+import { useContext, useEffect, useState} from "react";
 import axios from "../../config/axios";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import UserContext from "../../contexts/UserContext";
+import { toast } from 'react-hot-toast';
 
-function signupReducer(state, action) {
-    switch (action.type) {
-        case "field":
-            return {
-                ...state,
-                [action.name]: action.value,
-            };
-        case "signup":
-            return {
-                ...state,
-                loading: true,
-                error: null,
-            };
-        case "signupSuccess":
-            return {
-                ...state,
-                loading: false,
-                error: null,
-            };
-        case "signupFail":
-            return {
-                ...state,
-                loading: false,
-                password: "",
-                error: action.error,
-            };
-        default:
-            return state;
-    }
-}
 
 const SignupPage = () => {
     const { user, setUser } = useContext(UserContext);
@@ -40,37 +11,39 @@ const SignupPage = () => {
     const location = useLocation();
     let { from } = location.state || { from: { pathname: "/" } };
 
-    const [state, dispatch] = useReducer(signupReducer, {
+    const [state, setState] = useState({
         email: "",
         password: "",
         username: "",
-        phone: "",
-        loading: false,
-        error: "",
     });
 
     const formSubmit = (e) => {
         e.preventDefault();
 
-        dispatch({ type: "signup" });
         axios
             .post("/auth/signup", {
                 email: state.email,
                 password: state.password,
                 username: state.username,
-                phone: state.phone,
             })
-            .then((response) => {
-                dispatch({ type: "signupSuccess" });
-                setUser({
-                    ...response.user,
-                    token: response.token,
-                });
-                localStorage.setItem("token", response.token);
+            .then((res) => {
+                if (res.user){
+                    setUser({
+                        ...res.user,
+                        todos: undefined,
+                        token: res.token,
+                    });
+                    localStorage.setItem("token", res.token);
+                }
                 navigate(from, { replace: true });
             })
             .catch((err) => {
-                dispatch({ type: "signupFail", error: err.message });
+                console.log("Failed to sign up:", err);
+                if(err.code){
+                    toast.error(err.message);
+                }else{
+                    toast.error("Failed to sign up");
+                }
             });
     };
 
@@ -118,10 +91,9 @@ const SignupPage = () => {
                                                 className="mt-1 block w-full rounded-md border-[1px] border-gray-200 p-1 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
                                                 placeholder="Username"
                                                 onChange={(e) =>
-                                                    dispatch({
-                                                        type: "field",
-                                                        name: "username",
-                                                        value: e.target.value,
+                                                    setState({
+                                                        ...state,
+                                                        username: e.target.value,
                                                     })
                                                 }
                                                 required
@@ -144,10 +116,9 @@ const SignupPage = () => {
                                                 placeholder="Email address"
                                                 required
                                                 onChange={(e) =>
-                                                    dispatch({
-                                                        type: "field",
-                                                        name: "email",
-                                                        value: e.target.value,
+                                                    setState({
+                                                        ...state,
+                                                        email: e.target.value,
                                                     })
                                                 }
                                                 value={state.email}
@@ -170,10 +141,9 @@ const SignupPage = () => {
                                                 minLength={6}
                                                 maxLength={30}
                                                 onChange={(e) =>
-                                                    dispatch({
-                                                        type: "field",
-                                                        name: "password",
-                                                        value: e.target.value,
+                                                    setState({
+                                                        ...state,
+                                                        password: e.target.value,
                                                     })
                                                 }
                                                 value={state.password}
