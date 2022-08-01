@@ -41,7 +41,7 @@ const Footer = () => {
                 </ul>
                 <div className="my-4 flex items-center gap-6">
                     <a
-                        href="https://github.com/3ddelano"
+                        href="https://github.com/3ddelano/todo-list-mern"
                         target="_blank"
                         rel="noopener noreferrer nofollow"
                         className="text-gray-400 hover:text-gray-300"
