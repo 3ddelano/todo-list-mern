@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 
@@ -19,7 +19,7 @@ const App = () => {
 
     const [loading, setLoading] = useState(true);
 
-    useState(() => {
+    useEffect(() => {
         const localToken = localStorage.getItem("token");
         if (!localToken) {
             setLoading(false);
